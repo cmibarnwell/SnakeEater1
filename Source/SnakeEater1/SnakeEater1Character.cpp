@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Blueprint/UserWidget.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ASnakeEater1Character
@@ -20,6 +21,10 @@ ASnakeEater1Character::ASnakeEater1Character()
 	// set our turn rates for input
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
+
+	// Initialize Health and Shield
+	Health = 1.0;
+	Shield = 1.0;
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
@@ -46,6 +51,35 @@ ASnakeEater1Character::ASnakeEater1Character()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
+}
+
+void ASnakeEater1Character::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::FString("Health: ") + FString::SanitizeFloat(Health));
+
+	if (wFPSHUD) // Check if the Asset is assigned in the blueprint.
+	{
+		// Create the widget and store it.
+		MyFPSHUD = CreateWidget<UUserWidget>(GetWorld(), wFPSHUD);
+
+		// now you can use the widget directly since you have a referance for it.
+		// Extra check to  make sure the pointer holds the widget.
+		if (MyFPSHUD)
+		{
+			//let add it to the view port
+			MyFPSHUD->AddToViewport();
+		}
+	}
+}
+
+void ASnakeEater1Character::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (Shield < 1)
+		Shield += .001;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -131,5 +165,24 @@ void ASnakeEater1Character::MoveRight(float Value)
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
+	}
+}
+
+void ASnakeEater1Character::DealDamage(float DMG)
+{
+	Shield >= 0 ? Shield -= DMG : Health -= DMG;
+
+	if (wDamageFX) // Check if the Asset is assigned in the blueprint.
+	{
+		// Create the widget and store it.
+		MyDamageFX = CreateWidget<UUserWidget>(GetWorld(), wDamageFX);
+
+		// now you can use the widget directly since you have a referance for it.
+		// Extra check to  make sure the pointer holds the widget.
+		if (MyDamageFX)
+		{
+			//let add it to the view port
+			MyDamageFX->AddToViewport();
+		}
 	}
 }

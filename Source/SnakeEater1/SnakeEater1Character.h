@@ -29,6 +29,13 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
 
+	// Player Health and Shield
+	UPROPERTY(BlueprintReadOnly)
+	float Health;
+
+	UPROPERTY(BlueprintReadOnly)
+	float Shield;
+
 protected:
 
 	/** Resets HMD orientation in VR. */
@@ -63,10 +70,32 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
 
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
+
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	void DealDamage(float DMG);
+
+	// Reference UMG Asset in the Editor
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
+	TSubclassOf<class UUserWidget> wFPSHUD;
+
+	// Variable to hold the widget After Creating it.
+	UUserWidget* MyFPSHUD;
+
+	// Reference UMG Asset in the Editor
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
+	TSubclassOf<class UUserWidget> wDamageFX;
+
+	// Variable to hold the widget After Creating it.
+	UUserWidget* MyDamageFX;
+
+private:
+
 };
 
