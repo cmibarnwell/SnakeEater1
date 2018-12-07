@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "Containers/Set.h"
 #include "PlannerWorldState.generated.h"
 
 
@@ -11,8 +12,10 @@ UENUM()
 enum class EPlannerSymbol : uint32
 {
 	//define precondition/effect symbols here as needed
-	k_TESTSYMBOL,
-
+	k_TESTSYM1,
+	k_TESTSYM2,
+	k_TESTSYM3,
+	k_TESTSYM4,
 	//should always be last
 	NUM_SYMBOLS
 };
@@ -23,27 +26,29 @@ struct FWorldProperty
 	
 	GENERATED_BODY();
 
+	FWorldProperty() { };
+	FWorldProperty(EPlannerSymbol key, bool bVal);
+
+	UPROPERTY()
 	EPlannerSymbol key;
-	typedef union property_value
-	{
-		uint32 iValue;
-		bool bValue;
-	} FPropValue;
-	FPropValue value;
+
+	bool value;
 
 	friend bool operator==(const FWorldProperty &lhs, const FWorldProperty &rhs)
 	{
-		return lhs.value.bValue == rhs.value.bValue;
+		return lhs.value == rhs.value;
 	}
-	friend bool operator<(const FWorldProperty &lhs, const FWorldProperty &rhs)
-	{
-		return lhs.value.bValue < rhs.value.bValue;
-	}
+
+	
 };
 
 struct WorldPropertyKeyFuncs : DefaultKeyFuncs<FWorldProperty> {
-	static uint32 GetKeyHash(FWorldProperty prop) { return static_cast<uint32>(prop.key); }
-	static FWorldProperty GetSetKey(FWorldProperty prop) { return prop; }
+	typedef typename TCallTraits<FWorldProperty>::ParamType KeyInitType;
+	typedef typename TCallTraits<FWorldProperty>::ParamType ElementInitType;
+
+	static uint32 GetKeyHash(KeyInitType prop) { return static_cast<uint32>(prop.key); }
+	static KeyInitType GetSetKey(ElementInitType prop) { return prop; }
+	static bool Matches(KeyInitType A, KeyInitType B) { return A.key == B.key; }
 };
 
 /**

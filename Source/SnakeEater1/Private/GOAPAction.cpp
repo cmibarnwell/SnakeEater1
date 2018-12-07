@@ -2,6 +2,10 @@
 
 #include "GOAPAction.h"
 
+void UGOAPAction::ExecuteAction()
+{
+}
+
 bool UGOAPAction::DoesSatisfyProperty(EPlannerSymbol Key, FWorldProperty TargetProperty)
 {
 	FWorldProperty val = Effects[Key];

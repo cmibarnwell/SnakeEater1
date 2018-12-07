@@ -17,17 +17,20 @@ UCLASS()
 class SNAKEEATER1_API UPlanner : public UObject
 {
 	GENERATED_BODY()
-	
+
+		uint32 numActions;
 public:
+
+	FPlannerNode* SearchResultOnSuccess;
 	
+	UPROPERTY()
 	TArray<UGOAPAction*> ActionTable;
-	TMap<EPlannerSymbol, ActionID> EffectActionMap; //Assume one action per effect now but will need to expand this
 
-	UPlanner();
-	~UPlanner();
+	UPROPERTY()
+	TMap<EPlannerSymbol, uint32> EffectActionMap; //Assume one action per effect now but will need to expand this
 
-	void AddAction(UGOAPAction action);
-	TSharedPtr<FPlannerNode> MakePlan(FPlannerWorldState GoalConditions);
+	void AddAction(UGOAPAction *action);
+	bool SearchForGoal(FPlannerWorldState GoalConditions);
 };
 
 

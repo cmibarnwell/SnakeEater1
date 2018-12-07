@@ -2,31 +2,34 @@
 
 #include "Planner.h"
 
-UPlanner::UPlanner()
+void UPlanner::AddAction(UGOAPAction *action)
 {
-
+	ActionTable.Add(action);
+	for (auto& e : action->Effects)
+	{
+		EffectActionMap.Add(e.Key, numActions);
+	}
+	numActions++;
 }
 
-UPlanner::~UPlanner()
+bool UPlanner::SearchForGoal(FPlannerWorldState GoalConditions)
 {
-}
-
-void UPlanner::AddAction(UGOAPAction action)
-{
-}
-
-TSharedPtr<FPlannerNode> UPlanner::MakePlan(FPlannerWorldState GoalConditions)
-{
+	UE_LOG(LogTemp, Warning, TEXT("NumActions:%d"), ActionTable.Num())
+	for (auto& p : GoalConditions.Properties)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%d | %d"), static_cast<uint32>(p.key), p.value)
+	}
+	
 	//goal state and targetstate are expressed in terms of the same properties...
-	FPlannerNode CurrentNode;
-	CurrentNode.Unsatisfied = GoalConditions;
-	CurrentNode.costOfAction = 0;
-
+	FPlannerNode *CurrentNode = new FPlannerNode();
+	CurrentNode->Unsatisfied = GoalConditions;
+	CurrentNode->cost = 0;
+	CurrentNode->action = numActions;
+	CurrentNode->isTerminalNode = true;
 	TArray<FPlannerNode> Fringe;
-	TSet<FPlannerNode, NodeKeyFuncs> ClosedSet;
-	Fringe.Push(CurrentNode);
+	TSet<uint32> ClosedSet;
 	Fringe.Heapify();
-
+	bool isFringeEmpty = false;
 
 	//A* search from goal state
 	//closed set (action)
@@ -40,41 +43,60 @@ TSharedPtr<FPlannerNode> UPlanner::MakePlan(FPlannerWorldState GoalConditions)
 	}
 	return current
 	*/
-	while (!CurrentNode.HasReachedTarget() && (Fringe.Num() > 0))
+	while (!isFringeEmpty)
 	{
-		Fringe.HeapPop(CurrentNode);
+		if (CurrentNode->HasReachedTarget()) {
+			//TODO: cache result
+			SearchResultOnSuccess = CurrentNode;
+			return true;
+		}
+		UE_LOG(LogTemp, Warning, TEXT("Current Num: %d"), Fringe.Num())
+		ClosedSet.Add(CurrentNode->action);
+
+		
 		TSet< FPlannerNode, NodeKeyFuncs > children;
-		for (auto& Precond : CurrentNode.Unsatisfied.Properties)
+		for (auto& Precond : CurrentNode->Unsatisfied.Properties)
 		{
+
 			//find actions that MIGHT satisfy effects (will change to TMultiMap so multiple actions can have same effect)
 			ActionID* PotentialAction = EffectActionMap.Find(Precond.key);
-			
-			if (PotentialAction)
+			if (PotentialAction != nullptr)
 			{
+				UE_LOG(LogTemp, Error, TEXT("Looking at action %d"), *PotentialAction)
 				UGOAPAction* action = ActionTable[*PotentialAction];
-				if( (Precond == *(action->Effects.Find(Precond.key))) && action->IsContextSatisfied())
-				{
-					//check to see if we already a made a child node for this action
-					TSharedPtr<FPlannerNode> newChild(new FPlannerNode());
-					newChild->action = *PotentialAction;
-					FPlannerNode* child = children.Find(*newChild);
-					if (child)
+				FWorldProperty* p = action->Effects.Find(Precond.key);
+				if (p) {
+					UE_LOG(LogTemp, Error, TEXT("Action prop: %d | %d"), static_cast<uint32>(p->key), p->value)
+					UE_LOG(LogTemp, Error, TEXT("Precondition: %d | %d"), static_cast<uint32>(Precond.key), Precond.value)
+					
+					if (Precond == *p && action->IsContextSatisfied())
 					{
-						child->Unsatisfied.Properties.Remove(Precond);
-					}
-					else 
-					{
-						newChild->costOfAction = action->cost;
-						newChild->ParentNode = TSharedPtr<FPlannerNode>(&CurrentNode);
-						children.Add(*newChild);
+						//check to see if we already a made a child node for this action
+						FPlannerNode* newChild = new FPlannerNode();
+						newChild->action = *PotentialAction;
+						
+						if (!ClosedSet.Contains(*PotentialAction)) 
+						{
+							newChild->ParentNode = CurrentNode;
+							newChild->cost = action->cost + CurrentNode->cost;
+							for (auto & pre : action->Preconditions)
+							{
+								newChild->Unsatisfied.Properties.Add(pre.Value);
+								newChild->cost++;
+							}
+							Fringe.HeapPush(*newChild);
+						}
 					}
 				}
 			}
 		}
-		for (auto& successor : children) 
+		isFringeEmpty = (Fringe.Num() == 0);
+		if (!isFringeEmpty)
 		{
-			Fringe.HeapPush(successor);
+			Fringe.HeapPop(*CurrentNode);
 		}
 	}
-	return TSharedPtr<FPlannerNode>(&CurrentNode);
+
+	SearchResultOnSuccess = nullptr;
+	return false;
 }
