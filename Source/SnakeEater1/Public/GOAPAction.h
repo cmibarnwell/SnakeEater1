@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "AIController.h"
 #include "PlannerWorldState.h"
 #include "GOAPAction.generated.h"
 
@@ -17,9 +18,14 @@ class SNAKEEATER1_API UGOAPAction : public UObject
 {
 	GENERATED_BODY()	
 public:
+
+	UGOAPAction() {}
+	~UGOAPAction() {}
+
 	UPROPERTY()
 	uint32 cost; //assigned
 
+	virtual void ExecuteAction();
 
 	//Can probably change this to TSet
 	TMap<EPlannerSymbol, FWorldProperty> Preconditions;
