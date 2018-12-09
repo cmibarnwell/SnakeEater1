@@ -40,6 +40,10 @@ struct FPlannerNode
 	
 };
 
+
+//Custom keyfunctions to use FPlannerNode in TSet
+//Compares nodes by actionID and ignores unsatisfied conditions
+//keyhash is just action ID since we used a fixed size table
 struct NodeKeyFuncs : DefaultKeyFuncs<FPlannerNode> {
 	typedef typename TCallTraits<FPlannerNode>::ParamType KeyInitType;
 	typedef typename TCallTraits<FPlannerNode>::ParamType ElementInitType;
