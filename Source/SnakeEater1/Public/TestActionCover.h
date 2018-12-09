@@ -18,7 +18,7 @@ class SNAKEEATER1_API UTestActionCover : public UGOAPAction
 public:
 	UTestActionCover();
 
-	void ExecuteAction();
+	void ExecuteAction() override;
 };
 
 UCLASS()
@@ -29,5 +29,5 @@ class SNAKEEATER1_API UTestActionChain : public UGOAPAction
 public:
 	UTestActionChain();
 
-	void ExecuteAction();
+	void ExecuteAction() override;
 };

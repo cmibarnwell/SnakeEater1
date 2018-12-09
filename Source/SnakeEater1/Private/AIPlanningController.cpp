@@ -5,7 +5,7 @@
 AAIPlanningController::AAIPlanningController(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) {
 
 	planComp = CreateDefaultSubobject<UPlannerComponent>("planner");
-	//planComp->Activate();
+	//planComp->Activate(); I don't think this is necessary
 }
 
 void AAIPlanningController::BeginPlay() 
