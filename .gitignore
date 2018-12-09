@@ -2,6 +2,7 @@ Binaries
 DerivedDataCache
 Intermediate
 Saved
+*_BuiltData.uasset
 .vscode
 .vs
 *.VC.db
