@@ -5,10 +5,20 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "Containers/Set.h"
-#include "PlannerSymbolDefinitions.h"
 #include "PlannerWorldState.generated.h"
 
 
+UENUM()
+enum class EPlannerSymbol : uint32
+{
+	//define precondition/effect symbols here as needed
+	k_TESTSYM1,
+	k_TESTSYM2,
+	k_TESTSYM3,
+	k_TESTSYM4,
+	//should always be last
+	NUM_SYMBOLS
+};
 
 USTRUCT()
 struct FWorldProperty 

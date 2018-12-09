@@ -170,17 +170,8 @@ void ASnakeEater1Character::MoveRight(float Value)
 
 void ASnakeEater1Character::DealDamage(float DMG)
 {
-	//Should not use C expressions as flow control. 
-	//Also, something here is dereferencing a nullptr to (this)
-	if (Shield >= 0)
-	{
-		Shield -= DMG;
-	}
-	else 
-	{
-		Health -= DMG;
-	}
-	
+	Shield >= 0 ? Shield -= DMG : Health -= DMG;
+
 	if (wDamageFX) // Check if the Asset is assigned in the blueprint.
 	{
 		// Create the widget and store it.
