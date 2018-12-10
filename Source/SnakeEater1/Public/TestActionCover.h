@@ -7,27 +7,13 @@
 #include "PlannerWorldState.h"
 #include "TestActionCover.generated.h"
 
-/**
- * 
- */
 UCLASS()
-class SNAKEEATER1_API UTestActionCover : public UGOAPAction
+class SNAKEEATER1_API UTestActionIdle : public UGOAPAction
 {
 	GENERATED_BODY()
+
+public:
+	UTestActionIdle();
 	
-public:
-	UTestActionCover();
-
-	void ExecuteAction() override;
-};
-
-UCLASS()
-class SNAKEEATER1_API UTestActionChain : public UGOAPAction
-{
-	GENERATED_BODY()
-
-public:
-	UTestActionChain();
-
 	void ExecuteAction() override;
 };

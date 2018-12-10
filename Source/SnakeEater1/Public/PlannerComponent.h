@@ -20,18 +20,24 @@ class SNAKEEATER1_API UPlannerComponent : public UActorComponent
 	GENERATED_UCLASS_BODY()
 
 private:
+	TArray<FPlannerWorldState> Goals; //should be call to controlled pawn
+
+	UPROPERTY()
+	TArray<UGOAPAction*> ActionTable;
+
+	UPROPERTY()
+	TMap<EPlannerSymbol, uint32> EffectActionMap; //Assume one action per effect now but will need to expand this
 
 	bool needsPlan;
 
+	FPlannerNode* Plan; //maybe change to sharedptr
+	
 	UPROPERTY()
 	UGOAPAction* currentAction;
-
-	FPlannerNode* Plan;
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-
 
 public:	
 	// Called every frame
@@ -39,16 +45,10 @@ public:
 
 	uint32 numActions;
 
-	FPlannerNode * SearchResultOnSuccess;
-
-	UPROPERTY()
-		TArray<UGOAPAction*> ActionTable;
-
-	UPROPERTY()
-		TMap<EPlannerSymbol, uint32> EffectActionMap; //Assume one action per effect now but will need to expand this
+	FPlannerNode * SearchResultOnSuccess; //redundant
 
 	void AddAction(UGOAPAction *action);
-	bool SearchForGoal(FPlannerWorldState GoalConditions);
-	
+	void AddGoal(FPlannerWorldState &goal);
 
+	bool SearchForGoal(FPlannerWorldState GoalConditions);
 };

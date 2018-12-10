@@ -2,29 +2,14 @@
 
 #include "TestActionCover.h"
 
-UTestActionCover::UTestActionCover() 
+UTestActionIdle::UTestActionIdle()
 {
-	EPlannerSymbol Effect = EPlannerSymbol::k_TESTSYM3;
+	EPlannerSymbol Effect = EPlannerSymbol::k_Idling;
 	Effects.Add(Effect, FWorldProperty(Effect, true));
-	cost = 1;
+	cost = 0;
 }
 
-void UTestActionCover::ExecuteAction()
+void UTestActionIdle::ExecuteAction()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ACTION: TestActionCover"))
+	UE_LOG(LogTemp, Warning, TEXT("Action: Idling"))
 }
-
-UTestActionChain::UTestActionChain()
-{
-	EPlannerSymbol Effect = EPlannerSymbol::k_TESTSYM4;
-	EPlannerSymbol Precon = EPlannerSymbol::k_TESTSYM3;
-	Effects.Add(Effect, FWorldProperty(Effect, true));
-	Preconditions.Add(Precon, FWorldProperty(Precon, true));
-	cost = 1;
-}
-
-void UTestActionChain::ExecuteAction()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Action: TestActionChain"))
-}
-

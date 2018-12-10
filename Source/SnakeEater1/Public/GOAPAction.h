@@ -24,10 +24,12 @@ public:
 
 	UPROPERTY()
 	uint32 cost; //assigned
+	//should make protected
 
 	virtual void ExecuteAction();
 
 	//Can probably change this to TSet
+	//also make protected
 	TMap<EPlannerSymbol, FWorldProperty> Preconditions;
 	TMap<EPlannerSymbol, FWorldProperty> Effects;
 

@@ -9,17 +9,13 @@ UPlannerComponent::UPlannerComponent(const FObjectInitializer& ObjectInitializer
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	UTestActionCover* testAction = NewObject<UTestActionCover>();
-	UTestActionChain* testAction2 = NewObject<UTestActionChain>();
+	UTestActionIdle* testAction = NewObject<UTestActionIdle>();
 	AddAction(testAction);
-	AddAction(testAction2);
 	needsPlan = true;
-	/*
-	TSharedPtr<UTestActionCover> testAction = TSharedPtr<UTestActionCover>(NewObject<UTestActionCover>());
-	Planner->AddAction(testAction);
-	currentAction = testAction;
-	// ...
-	*/
+
+	FPlannerWorldState idle;
+	idle.Properties.Add(FWorldProperty(EPlannerSymbol::k_Idling, true));
+	AddGoal(idle);
 }
 
 // Called when the game starts
@@ -39,14 +35,19 @@ void UPlannerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	{
 		needsPlan = false;
 		UE_LOG(LogTemp, Warning, TEXT("NO ACTION SET"));
-		FPlannerWorldState test_GoalState;
-		test_GoalState.Properties.Add(FWorldProperty(EPlannerSymbol::k_TESTSYM4, true));
-		
-		bool success = SearchForGoal(test_GoalState);
-		if (success)
+		for (auto& goal : Goals)
 		{
-			Plan = SearchResultOnSuccess;
+			
+
+			bool success = SearchForGoal(goal);
+			if (success)
+			{
+				needsPlan = false;
+				Plan = SearchResultOnSuccess;
+				break;
+			}
 		}
+		
 	}
 
 	// ...
@@ -62,13 +63,18 @@ void UPlannerComponent::AddAction(UGOAPAction *action)
 	numActions++;
 }
 
+void UPlannerComponent::AddGoal(FPlannerWorldState &goal)
+{
+	Goals.Add(goal); //should add by priority
+}
+
 bool UPlannerComponent::SearchForGoal(FPlannerWorldState GoalConditions)
 {
 	UE_LOG(LogTemp, Warning, TEXT("NumActions:%d"), ActionTable.Num())
-		for (auto& p : GoalConditions.Properties)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("%d | %d"), static_cast<uint32>(p.key), p.value)
-		}
+	for (auto& p : GoalConditions.Properties)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%d | %d"), static_cast<uint32>(p.key), p.value)
+	}
 
 	//goal state and targetstate are expressed in terms of the same properties...
 	FPlannerNode *CurrentNode = new FPlannerNode();
@@ -80,32 +86,39 @@ bool UPlannerComponent::SearchForGoal(FPlannerWorldState GoalConditions)
 	TSet<uint32> ClosedSet;
 	Fringe.Heapify();
 	bool isFringeEmpty = false;
+	
 
 	//A* search from goal state
 	//closed set (action)
 	//fringe (Planner Nodes)
 	/*while (current is not target and fringe is not empty){
-	current = fringe pop
-	fringe push (N, cost(N)) for Node N in succ(current)
+		current = fringe pop
+		add current to Closed
 
-	successor(parent) : Node n foreach n not in Closed iff exists edge(parent, n)
-	exists edge(n0, n1) iff exists (k->v) in n1.effects s.t (e == pre), (k->e) in n1, (k->pre) in n0
+		fringe push (N, cost(N)) for Node N in succ(current)
+			successor(parent) : Node n foreach n not in Closed iff exists edge(parent, n)
+			exists edge(n0, n1) iff exists (k->v) in n1.effects s.t (e == pre), (k->e) in n1, (k->pre) in n0
 	}
 	return current
 	*/
-	while (!isFringeEmpty)
+	do //I didn't want to create a dummy node since it made some weird behavior
 	{
 		if (CurrentNode->HasReachedTarget()) {
 			//TODO: cache result
+			UE_LOG(LogTemp, Warning, TEXT("SEARCH RESULT SUCCEEDED"))
 			SearchResultOnSuccess = CurrentNode;
 			return true;
 		}
 		UE_LOG(LogTemp, Warning, TEXT("Current Num: %d"), Fringe.Num())
-			ClosedSet.Add(CurrentNode->action);
 
+		ClosedSet.Add(CurrentNode->action);
 
-		TSet< FPlannerNode, NodeKeyFuncs > children;
-		for (auto& Precond : CurrentNode->Unsatisfied.Properties)
+		//TODO: add a check somewhere
+		//to see if the precondition is satisfied by the world state
+		//before adding to unsatisfied properties
+
+		//add preconditions to unsatisfied properties
+		for (auto& Precond : CurrentNode->Unsatisfied.Properties) // should probably put world state check here actually
 		{
 
 			//find actions that MIGHT satisfy effects (will change to TMultiMap so multiple actions can have same effect)
@@ -113,40 +126,45 @@ bool UPlannerComponent::SearchForGoal(FPlannerWorldState GoalConditions)
 			if (PotentialAction != nullptr)
 			{
 				UE_LOG(LogTemp, Error, TEXT("Looking at action %d"), *PotentialAction)
-					UGOAPAction* action = ActionTable[*PotentialAction];
+				UGOAPAction* action = ActionTable[*PotentialAction];
 				FWorldProperty* p = action->Effects.Find(Precond.key);
-				if (p) {
-					UE_LOG(LogTemp, Error, TEXT("Action prop: %d | %d"), static_cast<uint32>(p->key), p->value)
-						UE_LOG(LogTemp, Error, TEXT("Precondition: %d | %d"), static_cast<uint32>(Precond.key), Precond.value)
-
+				if (p) 
+				{
+					UE_LOG(LogTemp, Error, TEXT("Action prop: %d | %d"), static_cast<uint32>(p->key), p->value);
+					UE_LOG(LogTemp, Error, TEXT("Precondition: %d | %d"), static_cast<uint32>(Precond.key), Precond.value);
+					
+					if (!ClosedSet.Contains(*PotentialAction))
+					{
 						if (Precond == *p && action->IsContextSatisfied())
 						{
-							//check to see if we already a made a child node for this action
+							//check to see if we already CHECKED a child node for this action
 							FPlannerNode* newChild = new FPlannerNode();
 							newChild->action = *PotentialAction;
 
-							if (!ClosedSet.Contains(*PotentialAction))
+						
+							newChild->ParentNode = (CurrentNode->isTerminalNode) ? nullptr : CurrentNode;
+							newChild->cost = action->cost + CurrentNode->cost;
+							for (auto & pre : action->Preconditions)
 							{
-								newChild->ParentNode = CurrentNode;
-								newChild->cost = action->cost + CurrentNode->cost;
-								for (auto & pre : action->Preconditions)
-								{
-									newChild->Unsatisfied.Properties.Add(pre.Value);
-									newChild->cost++;
-								}
-								Fringe.HeapPush(*newChild);
+								newChild->Unsatisfied.Properties.Add(pre.Value);
 							}
+							newChild->CalculateHeuristic();
+							Fringe.HeapPush(*newChild);
 						}
+					}
 				}
 			}
 		}
+
 		isFringeEmpty = (Fringe.Num() == 0);
+		//pop from fringe afterwards rather than create a dummy node at the start
 		if (!isFringeEmpty)
 		{
 			Fringe.HeapPop(*CurrentNode);
 		}
-	}
+	} while (!isFringeEmpty);
 
+	UE_LOG(LogTemp, Warning, TEXT("Search Result Failed"));
 	SearchResultOnSuccess = nullptr;
 	return false;
 }

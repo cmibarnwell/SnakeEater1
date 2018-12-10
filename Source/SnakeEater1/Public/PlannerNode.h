@@ -12,10 +12,11 @@ struct FPlannerNode
 {
 	GENERATED_BODY()
 
+	
 	FPlannerNode* ParentNode;
 
 	uint32 cost;
-
+	uint32 heuristic;
 	bool isTerminalNode;
 	
 	typedef uint32 ActionID;
@@ -24,14 +25,14 @@ struct FPlannerNode
 	UPROPERTY()
 	FPlannerWorldState Unsatisfied;
 
-	uint32 heuristic()
+	void CalculateHeuristic()
 	{
-		return Unsatisfied.Properties.Num();
+		heuristic = Unsatisfied.Properties.Num();
 	}
 
 	friend bool operator<(const FPlannerNode &lhs, const FPlannerNode &rhs)
 	{
-		return lhs.cost < rhs.cost;
+		return (lhs.cost + lhs.heuristic) < (rhs.cost + rhs.heuristic);
 	}
 
 	
