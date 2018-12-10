@@ -186,3 +186,8 @@ void ASnakeEater1Character::DealDamage(float DMG)
 		}
 	}
 }
+
+void ASnakeEater1Character::Heal(float h)
+{
+	Health + h >= 1 ? Health = 1 : Health += h;
+}
