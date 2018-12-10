@@ -14,6 +14,22 @@ class SNAKEEATER1_API UTestActionIdle : public UGOAPAction
 
 public:
 	UTestActionIdle();
-	
-	void ExecuteAction() override;
+};
+
+UCLASS()
+class SNAKEEATER1_API UAIPickupWeapon : public UGOAPAction
+{
+	GENERATED_BODY()
+
+public:
+	UAIPickupWeapon();
+};
+
+UCLASS()
+class SNAKEEATER1_API UAIAttack : public UGOAPAction
+{
+	GENERATED_BODY()
+
+public:
+	UAIAttack();
 };

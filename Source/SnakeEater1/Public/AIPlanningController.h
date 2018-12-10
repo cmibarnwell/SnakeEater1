@@ -3,8 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "AIController.h"
 #include "PlannerComponent.h"
+#include "ActionComponent.h"
 #include "AIPlanningController.generated.h"
 
 /**
@@ -18,8 +20,12 @@ class SNAKEEATER1_API AAIPlanningController : public AAIController
 private:
 	UPROPERTY()
 	UPlannerComponent* planComp;
+	bool NeedToReplan;
+	
 
 public:
+	UPlannerComponent * GetPlannerComponent() { return planComp; }
 
 	void BeginPlay() override;
+	void Tick(float deltatime) override;
 };

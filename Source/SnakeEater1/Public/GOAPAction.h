@@ -19,14 +19,12 @@ class SNAKEEATER1_API UGOAPAction : public UObject
 	GENERATED_BODY()	
 public:
 
-	UGOAPAction() {}
-	~UGOAPAction() {}
-
 	UPROPERTY()
 	uint32 cost; //assigned
 	//should make protected
 
-	virtual void ExecuteAction();
+	virtual void Activate();
+	virtual void Deactivate();
 
 	//Can probably change this to TSet
 	//also make protected

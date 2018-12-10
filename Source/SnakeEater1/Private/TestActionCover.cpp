@@ -9,7 +9,13 @@ UTestActionIdle::UTestActionIdle()
 	cost = 0;
 }
 
-void UTestActionIdle::ExecuteAction()
+UAIPickupWeapon::UAIPickupWeapon()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Action: Idling"))
+	Effects.Add(EPlannerSymbol::k_WeaponArmed, FWorldProperty(EPlannerSymbol::k_WeaponArmed, true));
+}
+
+UAIAttack::UAIAttack()
+{
+	Effects.Add(EPlannerSymbol::k_TargetIsDead, FWorldProperty(EPlannerSymbol::k_TargetIsDead, true));
+	Preconditions.Add(EPlannerSymbol::k_WeaponLoaded, FWorldProperty(EPlannerSymbol::k_WeaponLoaded, true));
 }

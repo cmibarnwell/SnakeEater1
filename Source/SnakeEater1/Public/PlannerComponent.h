@@ -40,8 +40,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	uint32 numActions;
 
@@ -49,6 +47,8 @@ public:
 
 	void AddAction(UGOAPAction *action);
 	void AddGoal(FPlannerWorldState &goal);
-
 	bool SearchForGoal(FPlannerWorldState GoalConditions);
+	bool HasPlan() { return Plan ? true : false; }
+	UGOAPAction* GetAction() { return currentAction; }
+	UGOAPAction* GetNextAction();
 };

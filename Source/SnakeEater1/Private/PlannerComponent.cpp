@@ -8,14 +8,6 @@ UPlannerComponent::UPlannerComponent(const FObjectInitializer& ObjectInitializer
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	UTestActionIdle* testAction = NewObject<UTestActionIdle>();
-	AddAction(testAction);
-	needsPlan = true;
-
-	FPlannerWorldState idle;
-	idle.Properties.Add(FWorldProperty(EPlannerSymbol::k_Idling, true));
-	AddGoal(idle);
 }
 
 // Called when the game starts
@@ -25,34 +17,7 @@ void UPlannerComponent::BeginPlay()
 
 }
 
-
-// Called every frame
-void UPlannerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	//if no plan exists, make one
-	if (needsPlan)
-	{
-		needsPlan = false;
-		UE_LOG(LogTemp, Warning, TEXT("NO ACTION SET"));
-		for (auto& goal : Goals)
-		{
-			
-
-			bool success = SearchForGoal(goal);
-			if (success)
-			{
-				needsPlan = false;
-				Plan = SearchResultOnSuccess;
-				break;
-			}
-		}
-		
-	}
-
-	// ...
-}
-
+//make actions in Pawn and add them to Planner
 void UPlannerComponent::AddAction(UGOAPAction *action)
 {
 	ActionTable.Add(action);
@@ -61,11 +26,6 @@ void UPlannerComponent::AddAction(UGOAPAction *action)
 		EffectActionMap.Add(e.Key, numActions);
 	}
 	numActions++;
-}
-
-void UPlannerComponent::AddGoal(FPlannerWorldState &goal)
-{
-	Goals.Add(goal); //should add by priority
 }
 
 bool UPlannerComponent::SearchForGoal(FPlannerWorldState GoalConditions)
@@ -167,4 +127,9 @@ bool UPlannerComponent::SearchForGoal(FPlannerWorldState GoalConditions)
 	UE_LOG(LogTemp, Warning, TEXT("Search Result Failed"));
 	SearchResultOnSuccess = nullptr;
 	return false;
+}
+
+UGOAPAction* UPlannerComponent::GetNextAction()
+{
+	return currentAction;
 }

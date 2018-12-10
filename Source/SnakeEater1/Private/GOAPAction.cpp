@@ -2,7 +2,11 @@
 
 #include "GOAPAction.h"
 
-void UGOAPAction::ExecuteAction()
+void UGOAPAction::Activate()
+{
+}
+
+void UGOAPAction::Deactivate()
 {
 }
 
