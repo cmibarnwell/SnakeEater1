@@ -26,6 +26,9 @@ ASnakeEater1Character::ASnakeEater1Character()
 	Health = 1.0;
 	Shield = 1.0;
 
+	// Init bDead
+	bDead = false;
+
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -185,9 +188,42 @@ void ASnakeEater1Character::DealDamage(float DMG)
 			MyDamageFX->AddToViewport();
 		}
 	}
+
+	if (Health <= 0.0) {
+		Death();
+	}
 }
 
 void ASnakeEater1Character::Heal(float h)
 {
 	Health + h >= 1 ? Health = 1 : Health += h;
+}
+
+void ASnakeEater1Character::Death()
+{
+	/*
+	AController* PC = GetController();
+
+	if (PC)
+	{
+		PC->bShowMouseCursor = true;
+		PC->bEnableClickEvents = true;
+		PC->bEnableMouseOverEvents = true;
+	}
+
+	if (wDeathScreen) // Check if the Asset is assigned in the blueprint.
+	{
+		// Create the widget and store it.
+		MyDeathScreen = CreateWidget<UUserWidget>(GetWorld(), wDeathScreen);
+
+		// now you can use the widget directly since you have a referance for it.
+		// Extra check to  make sure the pointer holds the widget.
+		if (MyDeathScreen)
+		{
+			//let add it to the view port
+			MyDeathScreen->AddToViewport();
+		}
+	}*/
+
+	bDead = true;
 }

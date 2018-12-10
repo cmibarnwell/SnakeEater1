@@ -36,6 +36,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	float Shield;
 
+	UPROPERTY(BlueprintReadOnly)
+	bool bDead;
+
 protected:
 
 	/** Resets HMD orientation in VR. */
@@ -96,7 +99,14 @@ public:
 	// Variable to hold the widget After Creating it.
 	UUserWidget* MyDamageFX;
 
-private:
+	// Reference UMG Asset in the Editor
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
+	TSubclassOf<class UUserWidget> wDeathScreen;
 
+	// Variable to hold the widget After Creating it.
+	UUserWidget* MyDeathScreen;
+
+private:
+	void Death();
 };
 
