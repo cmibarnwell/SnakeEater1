@@ -6,6 +6,7 @@
 #include "UObject/NoExportTypes.h"
 #include "AIController.h"
 #include "PlannerWorldState.h"
+#include "BehaviorTree/Blackboard/BlackboardKeyAllTypes.h"
 #include "GOAPAction.generated.h"
 
 
@@ -19,6 +20,7 @@ class SNAKEEATER1_API UGOAPAction : public UObject
 	GENERATED_BODY()	
 public:
 	bool isActivated;
+	bool isFinished;
 	UPROPERTY()
 	uint32 cost; //assigned
 	//should make protected

@@ -5,10 +5,12 @@
 void UGOAPAction::Activate(AAIController* controller)
 {
 	isActivated = true;
+	isFinished = false;
 }
 
 void UGOAPAction::Deactivate(AAIController* controller)
 {
+	isFinished = true;
 }
 
 void UGOAPAction::SetPrec(FWorldProperty Prop)

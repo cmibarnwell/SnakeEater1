@@ -14,9 +14,15 @@ class SNAKEEATER1_API UTestActionIdle : public UGOAPAction
 {
 	GENERATED_BODY()
 
+	UPROPERTY()
+	UClass* IdleAnim;
 public:
 	UTestActionIdle();
+	
+	virtual void Activate(AAIController* controller) override;
 };
+
+///////////////////////////////////////////////
 
 UCLASS()
 class SNAKEEATER1_API UAIPickupWeapon : public UGOAPAction
@@ -27,6 +33,8 @@ public:
 	UAIPickupWeapon();
 };
 
+///////////////////////////////////////////////
+
 UCLASS()
 class SNAKEEATER1_API UAIAttack : public UGOAPAction
 {
@@ -34,9 +42,41 @@ class SNAKEEATER1_API UAIAttack : public UGOAPAction
 
 protected:
 	UPROPERTY()
-	UAnimBlueprint* AttackAnim;
+	UClass* AttackAnim;
 public:
 	UAIAttack();
+
+	virtual void Activate(AAIController* controller) override;
+	virtual void Deactivate(AAIController* controller) override;
+	virtual bool IsValidAction(AAIController* controller) override;
+};
+
+/////////////////////////////////////////////////
+
+UCLASS()
+class SNAKEEATER1_API UAIFindAmmo : public UGOAPAction
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	UClass* MoveToAnim;
+public:
+	UAIFindAmmo();
+
+	virtual void Activate(AAIController* controller) override;
+	virtual void Deactivate(AAIController* controller) override;
+	virtual bool IsValidAction(AAIController* controller) override;
+};
+
+////////////////////////////////
+
+UCLASS()
+class SNAKEEATER1_API UAIWeaponLoadedAtom : public UGOAPAction
+{
+	GENERATED_BODY()
+
+public:
+	UAIWeaponLoadedAtom();
 
 	virtual void Activate(AAIController* controller) override;
 	virtual void Deactivate(AAIController* controller) override;

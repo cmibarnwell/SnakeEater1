@@ -30,6 +30,7 @@ void UPlannerComponent::AddAction(UGOAPAction *action)
 
 bool UPlannerComponent::SearchForGoal(FPlannerWorldState GoalConditions)
 {
+	SearchResultOnSuccess = nullptr;
 	UE_LOG(LogTemp, Warning, TEXT("NumActions:%d"), ActionTable.Num())
 	for (auto& p : GoalConditions.Properties)
 	{
@@ -42,9 +43,10 @@ bool UPlannerComponent::SearchForGoal(FPlannerWorldState GoalConditions)
 	CurrentNode->cost = 0;
 	CurrentNode->action = numActions;
 	CurrentNode->isTerminalNode = true;
-	TArray<FPlannerNode> Fringe;
+	CurrentNode->ParentNode = nullptr;
+	TArray<FPlannerNode*> Fringe;
 	TSet<uint32> ClosedSet;
-	Fringe.Heapify();
+	Fringe.HeapSort([](FPlannerNode &A, FPlannerNode &B) { return (A.cost + A.heuristic) < (B.cost + B.heuristic); });
 	bool isFringeEmpty = false;
 	
 
@@ -63,15 +65,16 @@ bool UPlannerComponent::SearchForGoal(FPlannerWorldState GoalConditions)
 	*/
 	do //I didn't want to create a dummy node since it made some weird behavior
 	{
-		if (CurrentNode->HasReachedTarget()) {
+		ClosedSet.Add(CurrentNode->action);
+
+		if (HaveReachedTarget(CurrentNode)) 
+		{
 			//TODO: cache result
 			UE_LOG(LogTemp, Warning, TEXT("SEARCH RESULT SUCCEEDED"))
 			SearchResultOnSuccess = CurrentNode;
 			return true;
 		}
 		UE_LOG(LogTemp, Warning, TEXT("Current Num: %d"), Fringe.Num())
-
-		ClosedSet.Add(CurrentNode->action);
 
 		//TODO: add a check somewhere
 		//to see if the precondition is satisfied by the world state
@@ -101,15 +104,16 @@ bool UPlannerComponent::SearchForGoal(FPlannerWorldState GoalConditions)
 							FPlannerNode* newChild = new FPlannerNode();
 							newChild->action = *PotentialAction;
 
-						
-							newChild->ParentNode = (CurrentNode->isTerminalNode) ? nullptr : CurrentNode;
+							newChild->isTerminalNode = false;
+							newChild->ParentNode = ((CurrentNode->isTerminalNode) ? nullptr : CurrentNode);
 							newChild->cost = action->cost + CurrentNode->cost;
 							for (auto & pre : action->Preconditions)
 							{
 								newChild->Unsatisfied.Properties.Add(pre.Value);
 							}
 							newChild->CalculateHeuristic();
-							Fringe.HeapPush(*newChild);
+							Fringe.HeapPush(newChild, [](FPlannerNode &A, FPlannerNode &B) { 
+								return (A.cost + A.heuristic) < (B.cost + B.heuristic); });
 						}
 					}
 				}
@@ -120,7 +124,9 @@ bool UPlannerComponent::SearchForGoal(FPlannerWorldState GoalConditions)
 		//pop from fringe afterwards rather than create a dummy node at the start
 		if (!isFringeEmpty)
 		{
-			Fringe.HeapPop(*CurrentNode);
+			Fringe.HeapPop(CurrentNode, [](FPlannerNode &A, FPlannerNode &B) {
+				return (A.cost + A.heuristic) < (B.cost + B.heuristic); 
+			});
 		}
 	} while (!isFringeEmpty);
 
@@ -129,11 +135,24 @@ bool UPlannerComponent::SearchForGoal(FPlannerWorldState GoalConditions)
 	return false;
 }
 
-UGOAPAction* UPlannerComponent::GetNextAction()
+UGOAPAction* UPlannerComponent::GetTopAction()
 {
 	if (SearchResultOnSuccess)
 	{
-		return ActionTable[SearchResultOnSuccess->action];
+		UGOAPAction* act = ActionTable[SearchResultOnSuccess->action];
+		SearchResultOnSuccess = SearchResultOnSuccess->ParentNode;
+		return act;
 	}
+	UE_LOG(LogTemp, Error, TEXT("NO PARENT NODE"))
 	return nullptr;
+}
+
+bool UPlannerComponent::HaveReachedTarget(FPlannerNode* CurrentNode)
+{
+	if (!CurrentNode->isTerminalNode)
+	{
+		UGOAPAction* action = ActionTable[CurrentNode->action];
+		return CurrentNode->HasReachedTarget() && action->IsValidAction(GetController());
+	}
+	return false;
 }

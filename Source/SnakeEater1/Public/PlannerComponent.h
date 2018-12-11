@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-
+#include "AIController.h"
 #include "GOAPAction.h"
 #include "PlannerNode.h"
 #include "TestActionCover.h"
@@ -44,7 +44,9 @@ public:
 
 	void AddAction(UGOAPAction *action);
 	bool SearchForGoal(FPlannerWorldState GoalConditions);
-	bool HasPlan() { return Plan ? true : false; }
-	UGOAPAction* GetNextAction();
+	
+	bool HaveReachedTarget(FPlannerNode* CurrentNode);
+
+	UGOAPAction* GetTopAction();
 	AAIController* GetController() { return Cast<AAIController>(GetOwner()); }
 };
