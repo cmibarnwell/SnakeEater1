@@ -46,9 +46,9 @@ public:
 	FPlannerNode * SearchResultOnSuccess; //redundant
 
 	void AddAction(UGOAPAction *action);
-	void AddGoal(FPlannerWorldState &goal);
 	bool SearchForGoal(FPlannerWorldState GoalConditions);
 	bool HasPlan() { return Plan ? true : false; }
 	UGOAPAction* GetAction() { return currentAction; }
 	UGOAPAction* GetNextAction();
+	AAIController* GetController() { return Cast<AAIController>(GetOwner()); }
 };

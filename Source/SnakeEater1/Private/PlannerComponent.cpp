@@ -95,7 +95,7 @@ bool UPlannerComponent::SearchForGoal(FPlannerWorldState GoalConditions)
 					
 					if (!ClosedSet.Contains(*PotentialAction))
 					{
-						if (Precond == *p && action->IsContextSatisfied())
+						if (Precond == *p)
 						{
 							//check to see if we already CHECKED a child node for this action
 							FPlannerNode* newChild = new FPlannerNode();
@@ -131,5 +131,9 @@ bool UPlannerComponent::SearchForGoal(FPlannerWorldState GoalConditions)
 
 UGOAPAction* UPlannerComponent::GetNextAction()
 {
-	return currentAction;
+	if (SearchResultOnSuccess)
+	{
+		return ActionTable[SearchResultOnSuccess->action];
+	}
+	return nullptr;
 }

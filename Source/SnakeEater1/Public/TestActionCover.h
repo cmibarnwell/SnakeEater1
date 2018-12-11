@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GOAPAction.h"
 #include "PlannerWorldState.h"
+#include "Animation/AnimBlueprint.h"
+#include "ConstructorHelpers.h"
 #include "TestActionCover.generated.h"
 
 UCLASS()
@@ -30,6 +32,13 @@ class SNAKEEATER1_API UAIAttack : public UGOAPAction
 {
 	GENERATED_BODY()
 
+protected:
+	UPROPERTY()
+	UAnimBlueprint* AttackAnim;
 public:
 	UAIAttack();
+
+	virtual void Activate(AAIController* controller) override;
+	virtual void Deactivate(AAIController* controller) override;
+	virtual bool IsValidAction(AAIController* controller) override;
 };

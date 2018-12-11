@@ -22,9 +22,13 @@ private:
 	UPlannerComponent* planComp;
 	bool NeedToReplan;
 	
-
+	//TODO: turn this into array
+	FPlannerWorldState goal;
 public:
 	UPlannerComponent * GetPlannerComponent() { return planComp; }
+
+	UFUNCTION(BlueprintCallable)
+	void SetReplan(bool ShouldReplan) { NeedToReplan = ShouldReplan; }
 
 	void BeginPlay() override;
 	void Tick(float deltatime) override;

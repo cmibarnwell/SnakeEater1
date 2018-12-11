@@ -2,7 +2,7 @@ Binaries
 DerivedDataCache
 Intermediate
 Saved
-Content/ThirdPersonCPP/Maps/*.uasset
+Content\ThirdPersonCPP\Maps\*.uasset
 .vscode
 .vs
 *.VC.db
@@ -13,3 +13,5 @@ Content/ThirdPersonCPP/Maps/*.uasset
 *.suo
 *.xcodeproj
 *.xcworkspace
+Content/ThirdPersonCPP/Maps/ThirdPersonExampleMap_BuiltData.uasset
+Content/ThirdPersonCPP/Maps/ThirdPersonExampleMap_BuiltData.uasset

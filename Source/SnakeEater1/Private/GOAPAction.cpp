@@ -2,11 +2,12 @@
 
 #include "GOAPAction.h"
 
-void UGOAPAction::Activate()
+void UGOAPAction::Activate(AAIController* controller)
 {
+	isActivated = true;
 }
 
-void UGOAPAction::Deactivate()
+void UGOAPAction::Deactivate(AAIController* controller)
 {
 }
 

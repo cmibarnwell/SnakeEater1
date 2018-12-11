@@ -6,7 +6,9 @@ AAIPlanningController::AAIPlanningController(const FObjectInitializer& ObjectIni
 
 	planComp = CreateDefaultSubobject<UPlannerComponent>("planner");
 	//planComp->Activate(); I don't think this is necessary
-	NeedToReplan = true;
+	NeedToReplan = false; //this will be false for now. Will eventually be true by default
+	goal.Properties.Add(FWorldProperty(EPlannerSymbol::k_TargetIsDead, true));
+	planComp->AddAction(NewObject<UAIAttack>());
 }
 
 void AAIPlanningController::BeginPlay() 
@@ -23,15 +25,22 @@ void AAIPlanningController::Tick(float deltatime)
 		//if its complete, get the next action
 		//if it failed, flag REPLAN
 	//if flagged REPLAN
-		//go through possessed pawn's goals by priority
+		//reevaluate goals
+		//check goals by priority
 		//attempt to make plan
-	if (planComp->HasPlan())
+	if (planComp->SearchResultOnSuccess)
 	{
 		NeedToReplan = false;
-
+		if (planComp->GetNextAction()->isActivated == false)
+		{
+			planComp->GetNextAction()->Activate(this);
+		}
 	}
 	else
 	{
-
+		if (NeedToReplan) 
+		{
+			bool success = planComp->SearchForGoal(goal); //will use flag when we make into a loop
+		}
 	}
 }

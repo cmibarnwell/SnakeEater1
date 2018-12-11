@@ -18,13 +18,13 @@ class SNAKEEATER1_API UGOAPAction : public UObject
 {
 	GENERATED_BODY()	
 public:
-
+	bool isActivated;
 	UPROPERTY()
 	uint32 cost; //assigned
 	//should make protected
 
-	virtual void Activate();
-	virtual void Deactivate();
+	virtual void Activate(AAIController*);
+	virtual void Deactivate(AAIController*);
 
 	//Can probably change this to TSet
 	//also make protected
@@ -33,4 +33,5 @@ public:
 
 	bool DoesSatisfyProperty(EPlannerSymbol Key, FWorldProperty TargetProperty);
 	virtual bool IsContextSatisfied() { return true; } //Will interact with controller here, don't worry for now
+	virtual bool IsValidAction(AAIController* controller) { return true; }
 };
