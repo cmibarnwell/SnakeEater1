@@ -28,8 +28,6 @@ struct FWorldProperty
 	{
 		return lhs.value == rhs.value;
 	}
-
-	
 };
 
 struct WorldPropertyKeyFuncs : DefaultKeyFuncs<FWorldProperty> {
@@ -52,4 +50,6 @@ struct FPlannerWorldState
 	TSet<FWorldProperty, WorldPropertyKeyFuncs> Properties;
 
 	bool IsSatisfied();
+
+	void SetProp(FWorldProperty newProp) { Properties.Add(newProp); }
 };

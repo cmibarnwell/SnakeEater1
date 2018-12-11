@@ -31,9 +31,6 @@ private:
 	bool needsPlan;
 
 	FPlannerNode* Plan; //maybe change to sharedptr
-	
-	UPROPERTY()
-	UGOAPAction* currentAction;
 
 protected:
 	// Called when the game starts
@@ -48,7 +45,6 @@ public:
 	void AddAction(UGOAPAction *action);
 	bool SearchForGoal(FPlannerWorldState GoalConditions);
 	bool HasPlan() { return Plan ? true : false; }
-	UGOAPAction* GetAction() { return currentAction; }
 	UGOAPAction* GetNextAction();
 	AAIController* GetController() { return Cast<AAIController>(GetOwner()); }
 };

@@ -5,9 +5,10 @@
 AAIPlanningController::AAIPlanningController(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) {
 
 	planComp = CreateDefaultSubobject<UPlannerComponent>("planner");
-	//planComp->Activate(); I don't think this is necessary
-	NeedToReplan = false; //this will be false for now. Will eventually be true by default
-	goal.Properties.Add(FWorldProperty(EPlannerSymbol::k_TargetIsDead, true));
+	planComp->Activate();// I don't think this is necessary
+	NeedNewPlan = false; //this will be false for now. Will eventually be true by default
+	goal.SetProp( FWorldProperty(EPlannerSymbol::k_TargetIsDead, true));
+	Goals.Add(goal);
 	planComp->AddAction(NewObject<UAIAttack>());
 }
 
@@ -28,19 +29,38 @@ void AAIPlanningController::Tick(float deltatime)
 		//reevaluate goals
 		//check goals by priority
 		//attempt to make plan
-	if (planComp->SearchResultOnSuccess)
+	if (NeedNewPlan && !isPlanning)
 	{
-		NeedToReplan = false;
-		if (planComp->GetNextAction()->isActivated == false)
+		currentAction = nullptr;
+		isPlanning = true;
+		//make sure there are no race conditions
+		ReevaluateGoals();
+		for (auto & goal : Goals)
 		{
-			planComp->GetNextAction()->Activate(this);
+			bool success = planComp->SearchForGoal(goal);
+			if (success)
+			{
+				NeedNewPlan = false;
+				break;
+			}
+		}
+		isPlanning = false;
+	} 
+	else if (!NeedNewPlan)
+	{
+		if (!currentAction) // TODO: and action is complete!
+		{
+			currentAction = planComp->GetNextAction();
+		}
+		if (currentAction && !(currentAction->isActivated))
+		{
+			currentAction->Activate(this);
 		}
 	}
-	else
-	{
-		if (NeedToReplan) 
-		{
-			bool success = planComp->SearchForGoal(goal); //will use flag when we make into a loop
-		}
-	}
+	
+}
+
+void AAIPlanningController::ReevaluateGoals()
+{
+
 }

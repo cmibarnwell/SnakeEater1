@@ -31,7 +31,12 @@ public:
 	TMap<EPlannerSymbol, FWorldProperty> Preconditions;
 	TMap<EPlannerSymbol, FWorldProperty> Effects;
 
+protected:
+	void SetPrec(FWorldProperty Prop);
+	void SetEffect(FWorldProperty Prop);
+public:
 	bool DoesSatisfyProperty(EPlannerSymbol Key, FWorldProperty TargetProperty);
 	virtual bool IsContextSatisfied() { return true; } //Will interact with controller here, don't worry for now
 	virtual bool IsValidAction(AAIController* controller) { return true; }
+	virtual bool IsComplete(AAIController* controller) { return true; }
 };

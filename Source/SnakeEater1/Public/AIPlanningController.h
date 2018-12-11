@@ -20,16 +20,20 @@ class SNAKEEATER1_API AAIPlanningController : public AAIController
 private:
 	UPROPERTY()
 	UPlannerComponent* planComp;
-	bool NeedToReplan;
-	
+	bool NeedNewPlan;
+	bool isPlanning;
+	UGOAPAction* currentAction;
+	TArray<FPlannerWorldState> Goals;
 	//TODO: turn this into array
 	FPlannerWorldState goal;
 public:
 	UPlannerComponent * GetPlannerComponent() { return planComp; }
 
 	UFUNCTION(BlueprintCallable)
-	void SetReplan(bool ShouldReplan) { NeedToReplan = ShouldReplan; }
+	void SetReplan(bool ShouldReplan) { NeedNewPlan = ShouldReplan; }
 
 	void BeginPlay() override;
 	void Tick(float deltatime) override;
+
+	void ReevaluateGoals();
 };

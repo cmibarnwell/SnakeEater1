@@ -11,6 +11,16 @@ void UGOAPAction::Deactivate(AAIController* controller)
 {
 }
 
+void UGOAPAction::SetPrec(FWorldProperty Prop)
+{
+	Preconditions.Add(Prop.key, Prop);
+}
+
+void UGOAPAction::SetEffect(FWorldProperty Prop)
+{
+	Effects.Add(Prop.key, Prop);
+}
+
 bool UGOAPAction::DoesSatisfyProperty(EPlannerSymbol Key, FWorldProperty TargetProperty)
 {
 	FWorldProperty val = Effects[Key];
