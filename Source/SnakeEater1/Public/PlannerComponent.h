@@ -25,8 +25,7 @@ private:
 	UPROPERTY()
 	TArray<UGOAPAction*> ActionTable;
 
-	UPROPERTY()
-	TMap<EPlannerSymbol, uint32> EffectActionMap; //Assume one action per effect now but will need to expand this
+	TMultiMap<EPlannerSymbol, uint32> EffectActionMap; //Assume one action per effect now but will need to expand this
 
 	bool needsPlan;
 
@@ -35,6 +34,7 @@ private:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+	FPlannerNode* CreateNode(FPlannerNode* CurrentNode, TArray<FWorldProperty> & CurrentWorldState, uint32 ActionID);
 
 public:	
 
@@ -43,10 +43,11 @@ public:
 	FPlannerNode * SearchResultOnSuccess; //redundant
 
 	void AddAction(UGOAPAction *action);
-	bool SearchForGoal(FPlannerWorldState GoalConditions);
+	bool SearchForGoal(FPlannerWorldState GoalConditions, TArray<FWorldProperty> &CurrentWorldState);
 	
 	bool HaveReachedTarget(FPlannerNode* CurrentNode);
 
 	UGOAPAction* GetTopAction();
 	AAIController* GetController() { return Cast<AAIController>(GetOwner()); }
+	
 };

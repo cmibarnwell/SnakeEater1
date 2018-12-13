@@ -49,7 +49,7 @@ struct FPlannerWorldState
 
 	TSet<FWorldProperty, WorldPropertyKeyFuncs> Properties;
 
-	bool IsSatisfied();
+	bool IsPropSatisfied(FWorldProperty test);
 
 	void SetProp(FWorldProperty newProp) { Properties.Add(newProp); }
 };
