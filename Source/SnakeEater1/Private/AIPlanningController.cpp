@@ -7,6 +7,12 @@ AAIPlanningController::AAIPlanningController(const FObjectInitializer& ObjectIni
 	PrimaryActorTick.bStartWithTickEnabled = true;
 	planComp = CreateDefaultSubobject<UPlannerComponent>("planner");
 	planComp->Activate();
+
+	CurrentWorldState.Reserve((uint32)EPlannerSymbol::NUM_SYMBOLS);
+	for (uint32 i = 0; i < (uint32)EPlannerSymbol::NUM_SYMBOLS; ++i)
+	{
+		CurrentWorldState.Add(FWorldProperty((EPlannerSymbol)i, false));
+	}
 	NeedNewPlan = false;
 	isPlanning = false;
 
@@ -19,7 +25,6 @@ AAIPlanningController::AAIPlanningController(const FObjectInitializer& ObjectIni
 	FPlannerWorldState idle;
 	idle.SetProp(FWorldProperty(EPlannerSymbol::k_Idling, true));
 	Goals.Add(idle);
-
 }
 
 void AAIPlanningController::BeginPlay() 
@@ -63,7 +68,7 @@ void AAIPlanningController::Tick(float deltatime)
 		ReevaluateGoals();
 		for (auto & goal : Goals)
 		{
-			bool success = planComp->SearchForGoal(goal);
+			bool success = planComp->SearchForGoal(goal, CurrentWorldState);
 			if (success)
 			{
 				if (currentAction && !currentAction->isFinished)

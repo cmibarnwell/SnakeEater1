@@ -2,9 +2,14 @@
 
 #include "PlannerWorldState.h"
 
-bool FPlannerWorldState::IsSatisfied()
+bool FPlannerWorldState::IsPropSatisfied(FWorldProperty test)
 {
-	return Properties.Num() == 0;
+	FWorldProperty* targetProp = Properties.Find(test);
+	if (targetProp && (*targetProp == test))
+	{
+		return true;
+	}
+	return false;
 }
 
 FWorldProperty::FWorldProperty(EPlannerSymbol key, bool bVal)

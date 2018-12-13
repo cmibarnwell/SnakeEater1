@@ -23,10 +23,12 @@ void UGOAPAction::SetEffect(FWorldProperty Prop)
 	Effects.Add(Prop.key, Prop);
 }
 
-bool UGOAPAction::DoesSatisfyProperty(EPlannerSymbol Key, FWorldProperty TargetProperty)
+bool UGOAPAction::DoesSatisfyProperty(FWorldProperty TestProperty)
 {
-	FWorldProperty val = Effects[Key];
-	if (TargetProperty == val) { //override
+	FWorldProperty* TargetProperty = Effects.Find(TestProperty.key);
+
+	if (TargetProperty && (TestProperty == *TargetProperty) )
+	{
 		return true;
 	}
 	return false;

@@ -28,7 +28,51 @@ void UPlannerComponent::AddAction(UGOAPAction *action)
 	numActions++;
 }
 
-bool UPlannerComponent::SearchForGoal(FPlannerWorldState GoalConditions)
+FPlannerNode* UPlannerComponent::CreateNode(FPlannerNode* CurrentNode, TArray<FWorldProperty> &CurrentWorldState, uint32 ActionID)
+{
+	UGOAPAction* Action = ActionTable[ActionID];
+
+	FPlannerNode* newChild = new FPlannerNode();
+	newChild->action = ActionID;
+
+	newChild->isTerminalNode = false;
+	newChild->ParentNode = ((CurrentNode->isTerminalNode) ? nullptr : CurrentNode);
+	newChild->cost = Action->cost + CurrentNode->cost;
+
+	//merge the world states
+	for (auto& Property : CurrentNode->Unsatisfied.Properties)
+	{
+		//add every property not satisified by the action's effects to the newchild state
+		if (!Action->DoesSatisfyProperty(Property) && !(Property == CurrentWorldState[(uint32)Property.key]))
+		{
+			newChild->Unsatisfied.SetProp(Property);
+		}
+	}
+
+	//this is why we should use a set 
+	for (auto & pre : Action->Preconditions)
+	{
+		//add all action preconditions
+		newChild->Unsatisfied.Properties.Add(pre.Value);
+	}
+
+	//calculate remainind unsatisfied properties
+	newChild->CalculateHeuristic();
+	return newChild;
+}
+
+//check validation conditions
+bool UPlannerComponent::HaveReachedTarget(FPlannerNode* CurrentNode)
+{
+	if (!CurrentNode->isTerminalNode)
+	{
+		UGOAPAction* action = ActionTable[CurrentNode->action];
+		return CurrentNode->HasReachedTarget() && action->IsValidAction(GetController());
+	}
+	return false;
+}
+
+bool UPlannerComponent::SearchForGoal(FPlannerWorldState GoalConditions, TArray<FWorldProperty> &CurrentWorldState)
 {
 	SearchResultOnSuccess = nullptr;
 	UE_LOG(LogTemp, Warning, TEXT("NumActions:%d"), ActionTable.Num())
@@ -63,9 +107,9 @@ bool UPlannerComponent::SearchForGoal(FPlannerWorldState GoalConditions)
 	}
 	return current
 	*/
-	do //I didn't want to create a dummy node since it made some weird behavior
+	do //I didn't want to add a dummy node to the fringe since it did weird stuff
 	{
-		ClosedSet.Add(CurrentNode->action);
+		ClosedSet.Add(CurrentNode->action); //this is fine though
 
 		if (HaveReachedTarget(CurrentNode)) 
 		{
@@ -81,40 +125,22 @@ bool UPlannerComponent::SearchForGoal(FPlannerWorldState GoalConditions)
 		//before adding to unsatisfied properties
 
 		//add preconditions to unsatisfied properties
-		for (auto& Precond : CurrentNode->Unsatisfied.Properties) // should probably put world state check here actually
+		for (auto& Precond : CurrentNode->Unsatisfied.Properties)
 		{
-
-			//find actions that MIGHT satisfy effects (will change to TMultiMap so multiple actions can have same effect)
-			ActionID* PotentialAction = EffectActionMap.Find(Precond.key);
-			if (PotentialAction != nullptr)
+			if (!(Precond == CurrentWorldState[(uint32)Precond.key]))
 			{
-				UE_LOG(LogTemp, Error, TEXT("Looking at action %d"), *PotentialAction)
-				UGOAPAction* action = ActionTable[*PotentialAction];
-				FWorldProperty* p = action->Effects.Find(Precond.key);
-				if (p) 
+				TArray<ActionID> Actions;
+				//find actions that MIGHT satisfy effects (will change to TMultiMap so multiple actions can have same effect)
+				EffectActionMap.MultiFind(Precond.key, Actions);
+				for (auto& actionIndex : Actions)
 				{
-					UE_LOG(LogTemp, Error, TEXT("Action prop: %d | %d"), static_cast<uint32>(p->key), p->value);
-					UE_LOG(LogTemp, Error, TEXT("Precondition: %d | %d"), static_cast<uint32>(Precond.key), Precond.value);
-					
-					if (!ClosedSet.Contains(*PotentialAction))
+					if (!ClosedSet.Contains(actionIndex))
 					{
-						if (Precond == *p)
-						{
-							//check to see if we already CHECKED a child node for this action
-							FPlannerNode* newChild = new FPlannerNode();
-							newChild->action = *PotentialAction;
+						UE_LOG(LogTemp, Error, TEXT("Looking at action %d"), actionIndex)
 
-							newChild->isTerminalNode = false;
-							newChild->ParentNode = ((CurrentNode->isTerminalNode) ? nullptr : CurrentNode);
-							newChild->cost = action->cost + CurrentNode->cost;
-							for (auto & pre : action->Preconditions)
-							{
-								newChild->Unsatisfied.Properties.Add(pre.Value);
-							}
-							newChild->CalculateHeuristic();
-							Fringe.HeapPush(newChild, [](FPlannerNode &A, FPlannerNode &B) { 
-								return (A.cost + A.heuristic) < (B.cost + B.heuristic); });
-						}
+						FPlannerNode* newChild = CreateNode(CurrentNode, CurrentWorldState, actionIndex);
+						Fringe.HeapPush(newChild, [](FPlannerNode &A, FPlannerNode &B) {
+							return (A.cost + A.heuristic) < (B.cost + B.heuristic); });
 					}
 				}
 			}
@@ -147,12 +173,3 @@ UGOAPAction* UPlannerComponent::GetTopAction()
 	return nullptr;
 }
 
-bool UPlannerComponent::HaveReachedTarget(FPlannerNode* CurrentNode)
-{
-	if (!CurrentNode->isTerminalNode)
-	{
-		UGOAPAction* action = ActionTable[CurrentNode->action];
-		return CurrentNode->HasReachedTarget() && action->IsValidAction(GetController());
-	}
-	return false;
-}

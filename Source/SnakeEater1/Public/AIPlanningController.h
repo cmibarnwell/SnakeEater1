@@ -26,6 +26,7 @@ private:
 	UPROPERTY()
 	UGOAPAction* currentAction;
 	TArray<FPlannerWorldState> Goals;
+	TArray<FWorldProperty> CurrentWorldState;
 public:
 	UPlannerComponent * GetPlannerComponent() { return planComp; }
 
