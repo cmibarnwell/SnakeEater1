@@ -30,7 +30,7 @@ public:
 	float BaseLookUpRate;
 
 	// Player Health and Shield
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 	float Health;
 
 	UPROPERTY(BlueprintReadOnly)

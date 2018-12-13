@@ -40,7 +40,9 @@ void APainVolume::DealDamage(UPrimitiveComponent* OverlappedComponent, AActor* O
 	bActorInside = true;
 
 
+	if (Player != nullptr) { //Must check that cast succeeded before dereferencing ptr. AI characters are causing segfault
 		Player->DealDamage(.2);
+	}
 }
 
 void APainVolume::EndDamage(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)

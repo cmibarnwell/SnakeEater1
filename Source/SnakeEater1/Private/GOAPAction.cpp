@@ -2,8 +2,25 @@
 
 #include "GOAPAction.h"
 
-void UGOAPAction::ExecuteAction()
+void UGOAPAction::Activate(AAIController* controller)
 {
+	isActivated = true;
+	isFinished = false;
+}
+
+void UGOAPAction::Deactivate(AAIController* controller)
+{
+	isFinished = true;
+}
+
+void UGOAPAction::SetPrec(FWorldProperty Prop)
+{
+	Preconditions.Add(Prop.key, Prop);
+}
+
+void UGOAPAction::SetEffect(FWorldProperty Prop)
+{
+	Effects.Add(Prop.key, Prop);
 }
 
 bool UGOAPAction::DoesSatisfyProperty(EPlannerSymbol Key, FWorldProperty TargetProperty)
