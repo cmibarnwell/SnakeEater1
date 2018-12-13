@@ -13,7 +13,7 @@ AHealthPickup::AHealthPickup()
 	SphereComponent->SetSphereRadius(100.0f);
 	SphereComponent->SetHiddenInGame(true);
 
-	SphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AHealthPickup::Heal);
+	
 
 }
 
@@ -21,7 +21,7 @@ AHealthPickup::AHealthPickup()
 void AHealthPickup::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	SphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AHealthPickup::Heal);
 }
 
 // Called every frame
@@ -35,5 +35,8 @@ void AHealthPickup::Heal(UPrimitiveComponent* OverlappedComponent, AActor* Other
 {
 	ASnakeEater1Character* Player = Cast<ASnakeEater1Character>(OtherActor);
 
-	Player->Heal(.5);
+	if (Player)
+	{
+		Player->Heal(.5);
+	}
 }
